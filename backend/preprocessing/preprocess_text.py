@@ -1,46 +1,28 @@
 # backend/preprocessing/preprocess_text.py
-
 import re
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
 def preprocess_text(text):
     """
-    Preprocess text while preserving:
-    - Capital letters
-    - Emojis
-    - Punctuation
-    - Numbers
-    - Tamil + English letters
-
-    Removes only:
-    - URLs
-    - Mentions (@user)
-    - Hashtags (#tag)
-    - Extra spaces
+    Clean text but preserve emojis, punctuation, capital letters, and numbers.
+    Removes URLs, mentions, hashtags, and extra spaces only.
     """
     if pd.isna(text):
         return ""
-
-    text = str(text)
-
+    text = str(text).strip()
     # Remove URLs
     text = re.sub(r"http\S+|www\S+", "", text)
-
-    # Remove mentions & hashtags
+    # Remove mentions and hashtags
     text = re.sub(r"@\w+|#\w+", "", text)
-
-    # Remove extra spaces
-    text = re.sub(r"\s+", " ", text).strip()
-
+    # Normalize multiple spaces
+    text = re.sub(r"\s+", " ", text)
     return text
-
-
 def encode_labels(labels):
     """
-    Encode labels into numeric IDs.
-    Returns encoded labels and LabelEncoder object
+    Convert string labels to numeric IDs using pandas factorize.
+    Returns encoded labels and the mapping encoder.
     """
-    encoder = LabelEncoder()
-    encoded = encoder.fit_transform(labels)
+    encoded, uniques = pd.factorize(labels)
+    encoder = {label: idx for idx, label in enumerate(uniques)}
     return encoded, encoder
